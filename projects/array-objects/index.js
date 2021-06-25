@@ -47,14 +47,19 @@ function map(array, fn) {
    reduce([1, 2, 3], (all, current) => all + current) // 6
  */
 //function reduce(array, fn, initial) {}
-function reduce(array, fn, initial = 0) {
-  let result = initial;
+function reduce(array, fn, initial) {
+  let currentVal = 0;
   for (let i = 0; i < array.length; i++) {
-    const curVal = array[i];
-    result = fn(result, curVal, i, array);
+    if (i === 0) {
+      if (initial === undefined) {
+        i++;
+      }
+      currentVal = fn(initial || array[0], array[i], i, array);
+      continue;
+    }
+    currentVal = fn(currentVal, array[i], i, array);
   }
-
-  return result;
+  return currentVal;
 }
 
 /*
