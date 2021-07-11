@@ -45,8 +45,59 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('input', function () {});
+let filterValue = '';
 
-addButton.addEventListener('click', () => {});
+filterNameInput.addEventListener('input', function () {
+  filterValue = this.value;
+  updateTable();
+});
 
-listTable.addEventListener('click', (e) => {});
+addButton.addEventListener('click', () => {
+  const name = encodeURIComponent(addNameInput.value.trim());
+  const value = encodeURIComponent(addValueInput.value.trim());
+  if (!name) return;
+  document.cookie = `${name}=${value}`;
+  updateTable();
+});
+
+listTable.addEventListener('click', (e) => {
+  const { role, cookieName } = e.target.dataset;
+  if (role === 'remove-cookie') {
+    document.cookie = `${cookieName}=deleted; max-age=0`;
+    updateTable();
+  }
+});
+
+function updateTable() {
+  listTable.innerHTML = '';
+  if (document.cookie === '') return;
+  const fragment = document.createDocumentFragment();
+  const cookies = document.cookie.split('; ');
+  for (let i = 0; i < cookies.length; i++) {
+    const cookieNameValue = cookies[i].split('=');
+    if (
+      filterValue &&
+      !cookieNameValue[0].toLowerCase().includes(filterValue.toLowerCase()) &&
+      !cookieNameValue[1].toLowerCase().includes(filterValue.toLowerCase())
+    ) {
+      continue;
+    }
+    const tr = document.createElement('tr');
+    const thName = document.createElement('td');
+    const thValue = document.createElement('td');
+    const thDelete = document.createElement('td');
+    const button = document.createElement('button');
+    button.dataset.role = 'remove-cookie';
+    button.dataset.cookieName = cookieNameValue[0];
+    button.textContent = 'Удалить';
+    thDelete.append(button);
+    thName.textContent = cookieNameValue[0];
+    thValue.textContent = cookieNameValue[1];
+    tr.append(thName);
+    tr.append(thValue);
+    tr.append(thDelete);
+    fragment.append(tr);
+  }
+  listTable.append(fragment);
+}
+updateTable();
